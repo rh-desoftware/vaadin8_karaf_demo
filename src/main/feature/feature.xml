@@ -9,6 +9,8 @@
     <feature name="vaadin" version="${vaadin.version}">
         <feature>http</feature>
         <feature>http-whiteboard</feature>
+        <feature>scr</feature>
+        <feature>spifly</feature>
         <bundle>mvn:org.jsoup/jsoup/1.14.2</bundle>
 		<bundle>mvn:com.google.code.findbugs/jsr305/3.0.2</bundle>
         <bundle>mvn:com.vaadin.external/gentyref/1.2.0.vaadin1</bundle>
