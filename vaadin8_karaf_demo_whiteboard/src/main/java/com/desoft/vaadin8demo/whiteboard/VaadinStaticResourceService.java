@@ -1,4 +1,4 @@
-package de.rhierlmeier.vaadin8osgi;
+package com.desoft.vaadin8demo.whiteboard;
 
 import java.io.IOException;
 import java.net.URL;

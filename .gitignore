@@ -1,3 +1,6 @@
 /.idea/
 /target/
 *.iml
+
+/vaadin8_karaf_demo_war/target
+/vaadin8_karaf_demo_whiteboard/target

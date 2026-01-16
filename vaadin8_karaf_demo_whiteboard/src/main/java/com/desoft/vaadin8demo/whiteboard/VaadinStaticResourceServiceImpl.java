@@ -1,26 +1,33 @@
-package de.rhierlmeier.vaadin8osgi;
+package com.desoft.vaadin8demo.whiteboard;
 
-import com.vaadin.osgi.resources.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import com.vaadin.osgi.resources.OsgiVaadinContributor;
+import com.vaadin.osgi.resources.OsgiVaadinResource;
+import com.vaadin.osgi.resources.OsgiVaadinTheme;
+import com.vaadin.osgi.resources.OsgiVaadinWidgetset;
 
 @Component(service = VaadinStaticResourceService.class)
 public class VaadinStaticResourceServiceImpl implements VaadinStaticResourceService {
 
     private static Logger m_Log = Logger.getLogger("VaadinStaticResourceServiceImpl");
 
-    private Map<Pattern,Object> m_PatterToContributor = new HashMap<>();
+    private final Map<Pattern, Object> m_PatterToContributor = new HashMap<>();
 
     @Override
-    public URL findResourceURL(String filename) throws IOException {
+    public URL findResourceURL(final String filename) {
 
         URL ret = null;
         synchronized (m_PatterToContributor) {
@@ -35,7 +42,7 @@ public class VaadinStaticResourceServiceImpl implements VaadinStaticResourceServ
             }
 
         }
-        if(ret == null) {
+        if (ret == null) {
             m_Log.warning(() -> "resource " + filename + " not found");
         }
         return ret;
@@ -48,7 +55,7 @@ public class VaadinStaticResourceServiceImpl implements VaadinStaticResourceServ
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeContributor"
     )
-    public void addContributor(OsgiVaadinContributor contributor) {
+    public void addContributor(final OsgiVaadinContributor contributor) {
 
         synchronized (m_PatterToContributor) {
             for (OsgiVaadinResource resource : contributor.getContributions()) {
@@ -59,17 +66,17 @@ public class VaadinStaticResourceServiceImpl implements VaadinStaticResourceServ
         }
     }
 
-    public void removeContributor(OsgiVaadinContributor contributor) {
+    public void removeContributor(final OsgiVaadinContributor contributor) {
         removePatterns(contributor);
     }
 
-    private void removePatterns(Object obj) {
+    private void removePatterns(final Object obj) {
         List<String> removedPatterns = new ArrayList<>();
         synchronized (m_PatterToContributor) {
             Iterator<Map.Entry<Pattern, Object>> iter = m_PatterToContributor.entrySet().iterator();
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 Map.Entry<Pattern, Object> entry = iter.next();
-                if(entry.getValue().equals(obj)) {
+                if (entry.getValue().equals(obj)) {
                     removedPatterns.add(entry.getKey().pattern());
                     iter.remove();
                     break;
@@ -86,14 +93,14 @@ public class VaadinStaticResourceServiceImpl implements VaadinStaticResourceServ
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeTheme"
     )
-    public void addTheme(OsgiVaadinTheme theme) {
-        Pattern pattern = toPattern("themes/", theme.getName() +"*");
+    public void addTheme(final OsgiVaadinTheme theme) {
+        Pattern pattern = toPattern("themes/", theme.getName() + "*");
         synchronized (m_PatterToContributor) {
             m_PatterToContributor.put(pattern, theme);
         }
     }
 
-    public void removeTheme(OsgiVaadinTheme theme) {
+    public void removeTheme(final OsgiVaadinTheme theme) {
         removePatterns(theme);
     }
 
@@ -103,18 +110,18 @@ public class VaadinStaticResourceServiceImpl implements VaadinStaticResourceServ
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeWidgetset"
     )
-    public void addWidgetset(OsgiVaadinWidgetset widgetset) {
+    public void addWidgetset(final OsgiVaadinWidgetset widgetset) {
         Pattern pattern = toPattern("widgetsets/", widgetset.getName() + "*");
         synchronized (m_PatterToContributor) {
             m_PatterToContributor.put(pattern, widgetset);
         }
     }
 
-    public void removeWidgetset(OsgiVaadinWidgetset widgetset) {
+    public void removeWidgetset(final OsgiVaadinWidgetset widgetset) {
         removePatterns(widgetset);
     }
 
-    private static Pattern toPattern(String prefix, String name) {
+    private static Pattern toPattern(final String prefix, final String name) {
         StringBuilder buf = new StringBuilder();
         buf.append("^/VAADIN/");
         buf.append(prefix);
@@ -123,15 +130,15 @@ public class VaadinStaticResourceServiceImpl implements VaadinStaticResourceServ
         return Pattern.compile(buf.toString());
     }
 
-    private static String globToReqExp(String str) {
+    private static String globToReqExp(final String str) {
         StringBuilder ret = new StringBuilder();
 
         StringBuilder currentPattern = new StringBuilder();
 
-        for(int i = 0; i < str.length(); i++) {
+        for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
-            if(c == '*') {
-                if(currentPattern.length() > 0) {
+            if (c == '*') {
+                if (!currentPattern.isEmpty()) {
                     ret.append(Pattern.quote(currentPattern.toString()));
                     currentPattern.setLength(0);
                 }
@@ -140,7 +147,7 @@ public class VaadinStaticResourceServiceImpl implements VaadinStaticResourceServ
                 currentPattern.append(c);
             }
         }
-        if(currentPattern.length() > 0) {
+        if (!currentPattern.isEmpty()) {
             ret.append(Pattern.quote(currentPattern.toString()));
             currentPattern.setLength(0);
         }
