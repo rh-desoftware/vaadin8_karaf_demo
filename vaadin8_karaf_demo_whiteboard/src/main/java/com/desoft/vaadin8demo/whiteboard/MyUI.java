@@ -23,9 +23,10 @@ import com.vaadin.ui.VerticalLayout;
 @Push(transport = Transport.WEBSOCKET_XHR)
 public class MyUI extends UI {
 
-
+    /** Updates the time every second */
     private ScheduledExecutorService m_Exe;
 
+    /** show the current time (just to ensure that the websocket is working) */
     private Label m_TimeLabel;
 
     @Override
@@ -47,26 +48,46 @@ public class MyUI extends UI {
         setContent(layout);
     }
 
-    @Override
-    public void attach() {
-        super.attach();
+    /**
+     * Sets the {@link ScheduledExecutorService} for managing scheduled tasks in the UI.
+     * If a previously set executor exists, it will be shut down before setting the new one.
+     *
+     * @param exe the {@link ScheduledExecutorService} instance to be set. Can be null to clear the executor.
+     * @return the supplied {@link ScheduledExecutorService} instance.
+     */
+    private ScheduledExecutorService setExecutor(final ScheduledExecutorService exe) {
         ScheduledExecutorService oldExe = m_Exe;
         if (oldExe != null) {
             oldExe.shutdown();
         }
-        m_Exe = Executors.newSingleThreadScheduledExecutor();
-        m_Exe.scheduleWithFixedDelay(this::tick, 0, 1, java.util.concurrent.TimeUnit.SECONDS);
+        m_Exe = exe;
+        return exe;
     }
 
+    /**
+     * Updates the {@code m_TimeLabel} with the current date and time.
+     * <p>
+     * This method is invoked periodically by a scheduled executor to refresh
+     * the time displayed in the UI. The time is formatted as "yyyy-MM-dd HH:mm:ss".
+     * <p>
+     * Uses {@code access()} to ensure that the update is safely executed
+     * within the UI thread, maintaining thread safety for UI components.
+     */
     private void tick() {
-
-        access(() -> {
-            m_TimeLabel.setValue(LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        });
+        access(() -> m_TimeLabel.setValue(LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
     }
 
     @Override
+    public void attach() {
+        super.attach();
+        setExecutor(Executors.newSingleThreadScheduledExecutor()).scheduleWithFixedDelay(this::tick, 0, 1, java.util.concurrent.TimeUnit.SECONDS);
+    }
+
+
+    @Override
     public void detach() {
+
         super.detach();
+        setExecutor(null);
     }
 }
