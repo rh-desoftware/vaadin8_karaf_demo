@@ -15,6 +15,7 @@ import org.osgi.service.component.annotations.Component;
 
 /**
  * pax-web enables the websocket support for the MyUiServlet only when in the bundle a Websocket is available.
+ * See also <a href="https://github.com/ops4j/org.ops4j.pax.web/issues/2135">PAX-WEB issue #2135</a>.
  */
 @ServerEndpoint(value = "/ws")
 @Component(service = Object.class,
