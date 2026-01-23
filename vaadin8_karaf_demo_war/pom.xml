@@ -93,6 +93,13 @@
 			<artifactId>vaadin-themes</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 
